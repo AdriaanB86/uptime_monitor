@@ -13,40 +13,33 @@ def check_site(website):
     except requests.exceptions.RequestException:
         return {"up": False, "status": None} 
 
+def get_state(check):
+    if check["up"]:
+        return "UP"
+    else:
+        return "DOWN"
+    
 def log_result(site, check):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    state = get_state(check)
     
-    if check["up"]:
-        state = "UP"
-    else:
-        state = "DOWN"
-
     line = f"{timestamp} | {site} | {state} | {check['status']}\n"
 
     with open("uptime_log.txt", "a") as file:
         file.write(line)
+
+def get_code(check):
+    if check["status"] is None:
+        return "No Response"
+    else:
+        return check['status']             
 
 sites = ["https://www.google.com", "https://this-site-does-not-exist-12345.com", "https://httpbin.org/status/500", "https://www.binance.com"]     
 
 for number, site in enumerate(sites, start=1):
     check = check_site(site)
     log_result(site, check)
-    if check["up"]:
-        state = "UP"
-    else:
-        state = "DOWN"   
-    if check["status"] is None:
-        code = "No Response"
-    else:
-        code = check['status']    
+    state = get_state(check)
+    code = get_code(check)
+      
     print(f"{number}. {site} - {state} {code}")
-
-
-
-
-
-
-
-
-
-
