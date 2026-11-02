@@ -1,8 +1,0 @@
-2026-11-02 16:27:51 | https://www.google.com | UP | 200
-2026-11-02 16:27:52 | https://this-site-does-not-exist-12345.com | DOWN | None
-2026-11-02 16:27:52 | https://httpbin.org/status/500 | DOWN | 500
-2026-11-02 16:27:53 | https://www.binance.com | UP | 202
-2026-11-02 16:28:20 | https://www.google.com | UP | 200
-2026-11-02 16:28:20 | https://this-site-does-not-exist-12345.com | DOWN | None
-2026-11-02 16:28:20 | https://httpbin.org/status/500 | DOWN | 500
-2026-11-02 16:28:21 | https://www.binance.com | UP | 202
