@@ -6,3 +6,6 @@
 
 # Python's cache files, created automatically when code runs
 __pycache__/
+
+# Log file the program writes to
+uptime_log.txt
