@@ -8,7 +8,7 @@ Uptime Monitor is a Python program that automatically checks if websites are onl
 ## Features
 - [x] Check if a single website is up
 - [x] Check a list of websites
-- [ ] Log results to a file
+- [x] Log results to a file
 - [ ] Send a Telegram alert when a site goes down
 - [ ] Run checks automatically on a schedule
 
