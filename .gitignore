@@ -1,0 +1,8 @@
+# Virtual environment (your installed packages; anyone can recreate it)
+.venv/
+
+# Secrets like your Telegram bot token. Never commit this.
+.env
+
+# Python's cache files, created automatically when code runs
+__pycache__/
