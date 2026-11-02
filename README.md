@@ -17,4 +17,4 @@ Uptime Monitor is a Python program that automatically checks if websites are onl
 - requests
 
 ## How to run
-🚧 Work in progress is this acceptable
+🚧 Work in progress
