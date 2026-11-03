@@ -8,6 +8,18 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 CHECK_INTERVAL = 300
+HELP_TEXT = (
+    "👋 Welcome to Uptime Monitor!\n\n"
+    "I check your websites and message you when one goes down "
+    "or comes back up.\n\n"
+    "Commands:\n"
+    "/list - show your monitored sites\n"
+    "/add <url> - add a site (e.g. /add https://example.com)\n"
+    "/remove <number> - remove a site (number from /list)\n"
+    "/help - show this message\n\n"
+    f"Sites are checked every {CHECK_INTERVAL // 60} minutes. "
+    "You can monitor up to 10 sites."
+)
 
 def check_site(website):
     try:
@@ -99,7 +111,10 @@ def handle_message(chat_id, text):
         return
     command = parts[0]
 
-    if command == "/list":
+    if command == "/start" or command == "/help":
+        send_message(chat_id, HELP_TEXT)
+
+    elif command == "/list":
         all_sites = load_sites()
         sites = all_sites.get(str(chat_id), [])
 
@@ -157,7 +172,10 @@ def handle_message(chat_id, text):
         removed = sites.pop(number - 1)
         all_sites[key] = sites
         save_sites(all_sites)
-        send_message(chat_id, f"🗑️ Removed {removed}")    
+        send_message(chat_id, f"🗑️ Removed {removed}")   
+         
+    else:
+        send_message(chat_id, "I didn't understand that.\n\n" + HELP_TEXT)
 
 offset = None
 last_check = 0
