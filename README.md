@@ -14,9 +14,9 @@ Uptime Monitor is a Python program that automatically checks if websites are onl
 - [x] Save each user's site list in a JSON file
 - [x] Bot reads incoming Telegram messages
 - [x] `/list` command: show your monitored sites
+- [x] `/add <url>` command: add a site (max 10 per user)
 
 ## Roadmap
-- [ ] `/add <url>` command: add a site (max 10 per user)
 - [ ] `/remove <number>` command: remove a site
 - [ ] Alert only when a site's status changes (no repeated alerts)
 - [ ] Multiple users, each with their own independent list

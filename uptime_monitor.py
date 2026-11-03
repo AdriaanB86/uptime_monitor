@@ -43,9 +43,11 @@ def send_message(chat_id, message):
         "text": message
     }
     try:
-        requests.post(url, data=data, timeout=5)
+        response = requests.post(url, data=data, timeout=10)
+        if not response.ok:
+            print("⚠️ Telegram error:", response.json().get("description"))
     except requests.exceptions.RequestException:
-        print("⚠️ Could not send Telegram alert")      
+        print("⚠️ Could not send Telegram message")    
 
 def get_code(check):
     if check["status"] is None:
@@ -68,7 +70,11 @@ def run_checks(chat_id, sites):
 def load_sites():
     with open("sites.json", "r") as file:
         data = json.load(file)
-        return data        
+        return data      
+
+def save_sites(all_sites):
+    with open("sites.json", "w") as file:
+        json.dump(all_sites, file, indent=2)      
 
 def get_updates(offset):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
@@ -80,7 +86,12 @@ def get_updates(offset):
         return []  
 
 def handle_message(chat_id, text):
-    if text == "/list":
+    parts = text.split()
+    if not parts:
+        return
+    command = parts[0]
+
+    if command == "/list":
         all_sites = load_sites()
         sites = all_sites.get(str(chat_id), [])
 
@@ -92,7 +103,34 @@ def handle_message(chat_id, text):
         for number, site in enumerate(sites, start=1):
             reply += f"{number}. {site}\n"
 
-        send_message(chat_id, reply)        
+        send_message(chat_id, reply)
+
+    elif command == "/add":
+        if len(parts) < 2:
+            send_message(chat_id, "Usage: /add https://example.com")
+            return
+        url = parts[1]
+
+        if not (url.startswith("http://") or url.startswith("https://")):
+            send_message(chat_id, "❌ The URL must start with http:// or https://")
+            return
+
+        all_sites = load_sites()
+        key = str(chat_id)
+        sites = all_sites.get(key, [])
+
+        if url in sites:
+            send_message(chat_id, "❌ That site is already in your list")
+            return
+
+        if len(sites) >= 10:
+            send_message(chat_id, "❌ You can monitor up to 10 sites")
+            return
+
+        sites.append(url)
+        all_sites[key] = sites
+        save_sites(all_sites)
+        send_message(chat_id, f"✅ Added {url}")
 
 offset = None
 last_check = 0
