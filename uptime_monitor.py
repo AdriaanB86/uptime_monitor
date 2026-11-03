@@ -88,9 +88,10 @@ def run_checks(chat_id, sites, last_status):
         print(f"{number}. {site} - {state} {code}")
 
 def load_sites():
+    if not os.path.exists("sites.json"):
+        return {}
     with open("sites.json", "r") as file:
-        data = json.load(file)
-        return data      
+        return json.load(file)  
 
 def save_sites(all_sites):
     with open("sites.json", "w") as file:
@@ -173,7 +174,7 @@ def handle_message(chat_id, text):
         all_sites[key] = sites
         save_sites(all_sites)
         send_message(chat_id, f"🗑️ Removed {removed}")   
-         
+
     else:
         send_message(chat_id, "I didn't understand that.\n\n" + HELP_TEXT)
 
