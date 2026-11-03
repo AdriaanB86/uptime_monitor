@@ -55,15 +55,23 @@ def get_code(check):
     else:
         return check['status']             
 
-def run_checks(chat_id, sites):
+def run_checks(chat_id, sites, last_status):
     for number, site in enumerate(sites, start=1):
         check = check_site(site)
         log_result(site, check)
         state = get_state(check)
         code = get_code(check)
 
-        if not check["up"]:
-            send_message(chat_id, f"🔴DOWN: {site} ({code})")
+        key = f"{chat_id} {site}"
+        was_up = last_status.get(key, True)
+        is_up = check["up"]
+
+        if was_up and not is_up:
+            send_message(chat_id, f"🔴 DOWN: {site} ({code})")
+        elif not was_up and is_up:
+            send_message(chat_id, f"🟢 BACK UP: {site} ({code})")
+
+        last_status[key] = is_up
 
         print(f"{number}. {site} - {state} {code}")
 
@@ -153,6 +161,7 @@ def handle_message(chat_id, text):
 
 offset = None
 last_check = 0
+last_status = {}
 
 while True:
     for update in get_updates(offset):
@@ -167,7 +176,7 @@ while True:
     if time.time() - last_check >= CHECK_INTERVAL:
         all_sites = load_sites()
         for chat_id, sites in all_sites.items():
-            run_checks(chat_id, sites)
+            run_checks(chat_id, sites, last_status)
         last_check = time.time()
 
     time.sleep(2)
