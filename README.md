@@ -1,9 +1,23 @@
 # Uptime Monitor
 
-Uptime Monitor is a Python program that automatically checks if websites are online, logs the results, and sends a Telegram alert when a site goes down.
+Uptime Monitor is a Telegram bot written in Python that checks websites every 5 minutes and messages you when a site goes down or comes back up. Each user manages their own list of sites with simple bot commands.
 
 ## Status
-🚧 Work in progress
+✅ Live: running 24/7 on an Oracle Cloud server
+
+## Bot commands
+| Command | What it does |
+|---|---|
+| `/start` or `/help` | Show the welcome message and the commands |
+| `/list` | Show your monitored sites |
+| `/add <url>` | Add a site, e.g. `/add https://example.com` (max 10 per user) |
+| `/remove <number>` | Remove a site, using the number from `/list` |
+
+Alerts look like this:
+```
+🔴 DOWN: https://example.com (500)
+🟢 BACK UP: https://example.com (200)
+```
 
 ## Features
 - [x] Check if a single website is up
@@ -30,19 +44,31 @@ Uptime Monitor is a Python program that automatically checks if websites are onl
 - requests
 - python-dotenv
 - Telegram Bot API
+- Oracle Cloud (Always Free Ubuntu server) and systemd
 
 ## How to run
-1. Clone the repo and create a virtual environment
-2. Install the packages: `pip install -r requirements.txt`
-3. Create a `.env` file in the project folder with:
+1. Create a bot with [@BotFather](https://t.me/BotFather) in Telegram and copy its token
+2. Clone the repo and create a virtual environment
+3. Install the packages: `pip install -r requirements.txt`
+4. Create a `.env` file in the project folder with:
    ```
    TELEGRAM_TOKEN=your_bot_token
    TELEGRAM_CHAT_ID=your_chat_id
    ```
-4. Create a `sites.json` file with your chat ID and the sites to monitor:
-   ```
-   {
-     "your_chat_id": ["https://www.google.com"]
-   }
-   ```   
 5. Run: `python uptime_monitor.py`
+6. Open your bot in Telegram, tap **Start**, and add sites with `/add`
+
+`sites.json` (each user's site list) and `uptime_log.txt` are created automatically, and are kept out of Git.
+
+## Running 24/7 on a server
+On the server, the bot runs as a systemd service, so it starts at boot and restarts itself if it crashes:
+
+```ini
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/uptime_monitor
+ExecStart=/home/ubuntu/uptime_monitor/.venv/bin/python uptime_monitor.py
+Restart=always
+```
+
+To update the server after pushing changes: `git pull`, then `sudo systemctl restart uptime-monitor`.
