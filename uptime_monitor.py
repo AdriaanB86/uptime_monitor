@@ -36,7 +36,7 @@ def log_result(site, check):
     with open("uptime_log.txt", "a") as file:
         file.write(line)
 
-def send_alert(chat_id, message):
+def send_message(chat_id, message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     data = {
         "chat_id": chat_id,
@@ -61,7 +61,7 @@ def run_checks(chat_id, sites):
         code = get_code(check)
 
         if not check["up"]:
-            send_alert(chat_id, f"🔴DOWN: {site} ({code})")
+            send_message(chat_id, f"🔴DOWN: {site} ({code})")
 
         print(f"{number}. {site} - {state} {code}")
 
@@ -77,23 +77,36 @@ def get_updates(offset):
         return response.json()["result"]
     except requests.exceptions.RequestException:
         print("⚠️ Could not get Telegram messages")
-        return []      
+        return []  
+
+def handle_message(chat_id, text):
+    if text == "/list":
+        all_sites = load_sites()
+        sites = all_sites.get(str(chat_id), [])
+
+        if not sites:
+            send_message(chat_id, "You have no sites yet.")
+            return
+
+        reply = "Your monitored sites:\n"
+        for number, site in enumerate(sites, start=1):
+            reply += f"{number}. {site}\n"
+
+        send_message(chat_id, reply)        
 
 offset = None
 last_check = 0
 
 while True:
-    # Job 1: handle new messages
     for update in get_updates(offset):
         offset = update["update_id"] + 1
         message = update.get("message")
         if message is None:
             continue
-        chat_id = message["chat"]["id"]
+        chat_id = message["chat"]["id"] 
         text = message.get("text", "")
-        print(f"Message from {chat_id}: {text}")
+        handle_message(chat_id, text)
 
-    # Job 2: check sites every CHECK_INTERVAL seconds
     if time.time() - last_check >= CHECK_INTERVAL:
         all_sites = load_sites()
         for chat_id, sites in all_sites.items():
