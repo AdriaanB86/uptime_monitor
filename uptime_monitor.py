@@ -1,4 +1,5 @@
 import requests
+import json
 import time
 from datetime import datetime
 import os
@@ -35,10 +36,10 @@ def log_result(site, check):
     with open("uptime_log.txt", "a") as file:
         file.write(line)
 
-def send_alert(message):
+def send_alert(chat_id, message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     data = {
-        "chat_id": TELEGRAM_CHAT_ID,
+        "chat_id": chat_id,
         "text": message
     }
     try:
@@ -52,7 +53,7 @@ def get_code(check):
     else:
         return check['status']             
 
-def run_checks(sites):  
+def run_checks(chat_id, sites):
     for number, site in enumerate(sites, start=1):
         check = check_site(site)
         log_result(site, check)
@@ -60,13 +61,18 @@ def run_checks(sites):
         code = get_code(check)
 
         if not check["up"]:
-            send_alert(f"🔴DOWN: {site} ({code})")
+            send_alert(chat_id, f"🔴DOWN: {site} ({code})")
 
         print(f"{number}. {site} - {state} {code}")
 
-sites = ["https://www.google.com", "https://this-site-does-not-exist-12345.com", "https://httpbin.org/status/500", "https://www.binance.com"]    
+def load_sites():
+    with open("sites.json", "r") as file:
+        data = json.load(file)
+        return data          
 
 while True:
-    run_checks(sites)
+    all_sites = load_sites()
+    for chat_id, sites in all_sites.items():
+        run_checks(chat_id, sites)
     print(f"Waiting {CHECK_INTERVAL} seconds...\n")
     time.sleep(CHECK_INTERVAL)

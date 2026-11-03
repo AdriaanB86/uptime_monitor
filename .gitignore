@@ -9,3 +9,6 @@ __pycache__/
 
 # Log file the program writes to
 uptime_log.txt
+
+# Each user's chat ID and site list (personal data)
+sites.json
