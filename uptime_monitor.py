@@ -1,5 +1,10 @@
 import requests
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def check_site(website):
     try:
@@ -28,6 +33,15 @@ def log_result(site, check):
     with open("uptime_log.txt", "a") as file:
         file.write(line)
 
+def send_alert(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    
+    data = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message
+    }
+    requests.post(url, data=data, timeout=5)       
+
 def get_code(check):
     if check["status"] is None:
         return "No Response"
@@ -41,5 +55,10 @@ for number, site in enumerate(sites, start=1):
     log_result(site, check)
     state = get_state(check)
     code = get_code(check)
-      
+
+    if not check["up"]:
+        send_alert(f"🔴DOWN: {site} ({code})")
+
     print(f"{number}. {site} - {state} {code}")
+
+
