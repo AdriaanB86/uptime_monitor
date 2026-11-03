@@ -132,6 +132,25 @@ def handle_message(chat_id, text):
         save_sites(all_sites)
         send_message(chat_id, f"✅ Added {url}")
 
+    elif command == "/remove":
+        if len(parts) < 2 or not parts[1].isdigit():
+            send_message(chat_id, "Usage: /remove 2  (use the number from /list)")
+            return
+        number = int(parts[1])
+
+        all_sites = load_sites()
+        key = str(chat_id)
+        sites = all_sites.get(key, [])
+
+        if number < 1 or number > len(sites):
+            send_message(chat_id, "❌ No site with that number. Send /list to see your sites.")
+            return
+
+        removed = sites.pop(number - 1)
+        all_sites[key] = sites
+        save_sites(all_sites)
+        send_message(chat_id, f"🗑️ Removed {removed}")    
+
 offset = None
 last_check = 0
 
