@@ -68,11 +68,36 @@ def run_checks(chat_id, sites):
 def load_sites():
     with open("sites.json", "r") as file:
         data = json.load(file)
-        return data          
+        return data        
+
+def get_updates(offset):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
+    try:
+        response = requests.get(url, params={"offset": offset}, timeout=10)
+        return response.json()["result"]
+    except requests.exceptions.RequestException:
+        print("⚠️ Could not get Telegram messages")
+        return []      
+
+offset = None
+last_check = 0
 
 while True:
-    all_sites = load_sites()
-    for chat_id, sites in all_sites.items():
-        run_checks(chat_id, sites)
-    print(f"Waiting {CHECK_INTERVAL} seconds...\n")
-    time.sleep(CHECK_INTERVAL)
+    # Job 1: handle new messages
+    for update in get_updates(offset):
+        offset = update["update_id"] + 1
+        message = update.get("message")
+        if message is None:
+            continue
+        chat_id = message["chat"]["id"]
+        text = message.get("text", "")
+        print(f"Message from {chat_id}: {text}")
+
+    # Job 2: check sites every CHECK_INTERVAL seconds
+    if time.time() - last_check >= CHECK_INTERVAL:
+        all_sites = load_sites()
+        for chat_id, sites in all_sites.items():
+            run_checks(chat_id, sites)
+        last_check = time.time()
+
+    time.sleep(2)
