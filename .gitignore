@@ -12,3 +12,9 @@ uptime_log.txt
 
 # Each user's chat ID and site list (personal data)
 sites.json
+
+# Personal notes for Claude (kept private)
+CLAUDE.md
+
+# VS Code's personal editor settings
+.vscode/
